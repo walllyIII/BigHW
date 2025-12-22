@@ -10,7 +10,7 @@
 #include "../include/class_cft.h"
 using namespace std;
 
-#define TEST_FOR_FIXED_FILE	1
+#define TEST_FOR_FIXED_FILE	0
 
 #if TEST_FOR_FIXED_FILE
 
@@ -239,7 +239,7 @@ int readconfig_homework_conf(const char* const fname)
 
 	cout << endl;
 	cout << "[课号]" << endl;
-	for (auto& it : cno_table)
+	for (auto& it : cno_table)//test
 		cout << it << endl; //前后加*便于看清空格等隐含字符
 	cout << endl;
 

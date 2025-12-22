@@ -227,7 +227,7 @@ void cct_showstr(const int X, const int Y, const char *str, const int bg_color, 
 		rpt = 1; //防止错误参数
 
 	if (maxlen < 0)
-		maxlen = strlen(str) * rpt; //未给出maxlen则为原始长度
+		maxlen = (int)strlen(str) * rpt; //未给出maxlen则为原始长度
 
 	/*	双线框架："╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬"
 		单线框架："┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋"

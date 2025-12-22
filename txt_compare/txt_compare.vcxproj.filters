@@ -15,31 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cmd_console_tools.h">
+    <ClCompile Include="txt_compare_main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\txt_compare.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\class_aat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\proceed_line.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\cmd_console_tools.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\txt_compare.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="simple_menu.h">
+    <ClInclude Include="..\include\class_aat.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="cmd_hdc_tools.h">
+    <ClInclude Include="..\include\proceed_line.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="class_aat.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="lib_aat_tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="lib_thdc_tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="class_cft.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="txt_compare.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="proceed_line.h">
+    <ClInclude Include="..\include\cmd_console_tools.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

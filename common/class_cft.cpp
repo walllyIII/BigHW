@@ -6,29 +6,34 @@
 
 /* 添加自己需要的头文件，注意限制 */
 #include "../include/class_cft.h"
+#include"../include/proceed_line.h"
 using namespace std;
 
 static string proceed_line(string raw_line)
 {
 	/* 按需完成，对读入的每行内容进行预处理，例如去掉注释、去掉行尾的换行符等 */
 	string ret=raw_line;
-	for (int i = 0; i < (int)raw_line.size(); i++) {
-		if(raw_line[i]=='#'||raw_line[i]==';' || (raw_line[i]=='/' && raw_line[i+1]=='/')) {
-			ret = raw_line.substr(0,i);
-			break;
-		}
-	}
-	int x = 0, y = ret.size();
+	ret = remove_comment_in_line(ret, "#");
+	ret = remove_comment_in_line(ret, ";");
+	ret = remove_comment_in_line(ret, "//");
+	//for (int i = 0; i < (int)raw_line.size(); i++) {
+	//	if(raw_line[i]=='#'||raw_line[i]==';' || (raw_line[i]=='/' && raw_line[i+1]=='/')) {
+	//		ret = raw_line.substr(0,i);
+	//		break;
+	//	}
+	//}
+	ret = remove_space_in_line(ret, "all");
+	/*int x = 0, y = ret.size();
 	while (x < y && (ret[x] == ' ' || ret[x] == '\t')) x++;
 	while (y > x && (ret[y - 1] == ' ' || ret[y - 1] == '\t' || ret[y - 1] == '\n' || ret[y - 1] == '\r')) y--;
-	ret = ret.substr(x, y - x);
+	ret = ret.substr(x, y - x);*/
 	return ret;
 }
 
 static bool compare_string(const string& s1, const string& s2, const bool is_case_sensitive)
 {
 	/* 按需完成，比较两个字符串是否相等，考虑大小写敏感与否 */
-	if (is_case_sensitive) {
+	/*if (is_case_sensitive) {
 		return s1 == s2;
 	}
 	else {
@@ -37,7 +42,8 @@ static bool compare_string(const string& s1, const string& s2, const bool is_cas
 			if (tolower(s1[i]) != tolower(s2[i])) return false;
 		}
 		return true;
-	}
+	}*/
+	return cmp_str(s1, s2, is_case_sensitive);
 }
 
 static void insert_to_vector_if_not_exist(vector< SPAIR >& vec,const SPAIR& val)
@@ -176,7 +182,7 @@ int config_file_tools::get_all_group(vector <string>& ret)
 	for (vector<SPAIR>::const_iterator one_pair = this->cfg_list.begin(); one_pair != this->cfg_list.end(); ++one_pair){
 		ret.push_back(one_pair->first);
 	}
-	return ret.size();
+	return (int)ret.size();
 }
 
 /***************************************************************************
@@ -195,7 +201,7 @@ int config_file_tools::get_all_item(const char* const group_name, vector <string
 	for (int i = 0; i < (int)this->cfg_list.size(); i++) {
 		if (compare_string(this->cfg_list[i].first, group_name, is_case_sensitive)) {
 			ret = this->cfg_list[i].second;
-			return ret.size();
+			return (int)ret.size();
 		}
 	}
 	return 0;

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{81415db7-8ce2-4947-8878-327c2e793128}</ProjectGuid>
-    <RootNamespace>testreadcfg</RootNamespace>
+    <ProjectGuid>{bb2a7eb4-915c-4403-a1ed-09ac1647f5a7}</ProjectGuid>
+    <RootNamespace>txtcompare</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -124,14 +124,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\class_aat.cpp" />
-    <ClCompile Include="..\common\class_cft.cpp" />
+    <ClCompile Include="..\common\cmd_console_tools.cpp" />
     <ClCompile Include="..\common\proceed_line.cpp" />
-    <ClCompile Include="test_readcfg.cpp" />
+    <ClCompile Include="..\common\txt_compare.cpp" />
+    <ClCompile Include="txt_compare_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\class_aat.h" />
-    <ClInclude Include="..\include\class_cft.h" />
+    <ClInclude Include="..\include\cmd_console_tools.h" />
     <ClInclude Include="..\include\proceed_line.h" />
+    <ClInclude Include="..\include\txt_compare.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

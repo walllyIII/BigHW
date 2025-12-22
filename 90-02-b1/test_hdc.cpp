@@ -65,7 +65,7 @@ int select_test_item(char test_choice[])
 
 	/* 求所有提示字符串的最大长度 */
 	for (i = 0; item[i].prompt; i++) {
-		item[i].len = strlen(item[i].prompt);
+		item[i].len = (int)strlen(item[i].prompt);
 		if (max_len < item[i].len)
 			max_len = item[i].len;
 	}

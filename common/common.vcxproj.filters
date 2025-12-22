@@ -30,5 +30,11 @@
     <ClCompile Include="class_cft.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="txt_compare.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="proceed_line.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
