@@ -48,7 +48,7 @@ static string CF_CRLF_equal(const string& str)
 static string string_remove_special_char(const string& str)
 {
 	string result = str;
-	for(int i = 0; i < str.size(); i++) {
+	for(int i = 0; i < (int)str.size(); i++) {
 		if ((int)result[i] == 13 || (int)result[i] == 11 || (int)result[i] == 10 || (int)result[i] == 8 || (int)result[i] == 7)
 			result[i] = 'X';
 	}

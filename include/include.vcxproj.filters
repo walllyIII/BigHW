@@ -42,5 +42,8 @@
     <ClInclude Include="proceed_line.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="exe_running.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
