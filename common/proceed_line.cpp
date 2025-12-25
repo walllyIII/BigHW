@@ -1,3 +1,4 @@
+/* 2452839 Ðì´¨ ¼Æ¿Æ */
 #include"../include/proceed_line.h"
 using namespace std;
 

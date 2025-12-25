@@ -27,9 +27,6 @@
     <ClCompile Include="..\common\txt_compare.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\exe_running.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\proceed_line.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

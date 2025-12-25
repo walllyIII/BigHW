@@ -9,3 +9,4 @@
 #include"../include/class_aat.h"
 #include"../include/class_cft.h"
 #include"../include/txt_compare.h"
+#include"../include/proceed_line.h"

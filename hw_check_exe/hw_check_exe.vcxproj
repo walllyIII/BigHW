@@ -126,7 +126,6 @@
     <ClCompile Include="..\common\class_aat.cpp" />
     <ClCompile Include="..\common\class_cft.cpp" />
     <ClCompile Include="..\common\cmd_console_tools.cpp" />
-    <ClCompile Include="..\common\exe_running.cpp" />
     <ClCompile Include="..\common\proceed_line.cpp" />
     <ClCompile Include="..\common\txt_compare.cpp" />
     <ClCompile Include="hw_check_exe_main.cpp" />

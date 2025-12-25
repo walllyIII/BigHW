@@ -11,6 +11,30 @@
 #include<vector>
 using namespace std;
 
+static string CF_CRLF_equal(const string& str)
+{
+	string result = str, str_end;
+	if (str.size() >= 2) {
+		if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
+			return str.substr(0, str.size() - 2) + '\n';
+		else
+			return str.substr(0, str.size());
+	}
+	else {
+		return str;
+	}
+}
+
+static string string_remove_special_char(const string& str)
+{
+	string result = str;
+	for (int i = 0; i < (int)str.size(); i++) {
+		if ((int)result[i] == 13 || (int)result[i] == 11 || (int)result[i] == 10 || (int)result[i] == 8 || (int)result[i] == 7)
+			result[i] = 'X';
+	}
+	return result;
+}
+
 txt_compare::txt_compare(string filename1, string filename2, string trim_type, string display_type, int line_skip, int line_offset, int line_max_diffnum, int line_max_linenum, bool ignore_blank, bool CR_CRLF_not_equal, bool debug)
 {
 	this->filename1 = filename1;
@@ -24,35 +48,121 @@ txt_compare::txt_compare(string filename1, string filename2, string trim_type, s
 	this->ignore_blank = ignore_blank;
 	this->CR_CRLF_not_equal = CR_CRLF_not_equal;
 	this->debug = debug;
+	ifstream file1, file2;
+	int skip1, skip2;
+	file1.open(filename1, ios::in | ios::binary);
+	if (file1.fail()) {
+		cerr << "无法打开文件：" << filename1 << endl;
+		return;
+	}
+	file2.open(filename2, ios::in | ios::binary);
+	if (file2.fail()) {
+		cerr << "无法打开文件：" << filename2 << endl;
+		return;
+	}
+	string tmp;
+	if (line_offset >= 0) {
+		skip1 = line_skip;
+		skip2 = line_skip + line_offset;
+	}
+	else {
+		skip1 = line_skip - line_offset;
+		skip2 = line_skip;
+	}
+	while (getline(file1, tmp, '\n')) {
+		tmp += '\n';
+		tmp = remove_space_in_line(tmp, this->trim_type);
+		if (this->CR_CRLF_not_equal == false) {
+			tmp = CF_CRLF_equal(tmp);
+		}
+		if (ignore_blank && remove_endline(tmp).empty()) {
+			continue;
+		}
+		skip1--;
+		if (skip1 < 0) {
+			vline1.push_back(tmp);
+			line_maxlen = max(line_maxlen, (int)tmp.size());
+		}
+	}
+	while (getline(file2, tmp, '\n')) {
+		tmp += '\n';
+		tmp = remove_space_in_line(tmp, this->trim_type);
+
+		if (this->CR_CRLF_not_equal == false) {
+			tmp = CF_CRLF_equal(tmp);
+		}
+		if (ignore_blank && remove_endline(tmp).empty()) {
+			continue;
+		}
+		skip2--;
+		if (skip2 < 0) {
+			vline2.push_back(tmp);
+			line_maxlen = max(line_maxlen, (int)tmp.size());
+		}
+	}
+	file1.close();
+	file2.close();
+}
+
+txt_compare::txt_compare(istringstream iss1, istringstream iss2, string trim_type, string display_type, int line_skip, int line_offset, int line_max_diffnum, int line_max_linenum, bool ignore_blank, bool CR_CRLF_not_equal, bool debug)
+{
+	this->filename1 = "iss1";
+	this->filename2 = "iss2";
+	this->trim_type = trim_type;
+	this->display_type = display_type;
+	this->line_skip = line_skip;
+	this->line_offset = line_offset;
+	this->line_max_diffnum = line_max_diffnum;
+	this->line_max_linenum = line_max_linenum;
+	this->ignore_blank = ignore_blank;
+	this->CR_CRLF_not_equal = CR_CRLF_not_equal;
+	this->debug = debug;
+	int skip1, skip2;
+	string tmp;
+	if (line_offset >= 0) {
+		skip1 = line_skip;
+		skip2 = line_skip + line_offset;
+	}
+	else {
+		skip1 = line_skip - line_offset;
+		skip2 = line_skip;
+	}
+	while (getline(iss1, tmp, '\n')) {
+		tmp += '\n';
+		tmp = remove_space_in_line(tmp, this->trim_type);
+		if (this->CR_CRLF_not_equal == false) {
+			tmp = CF_CRLF_equal(tmp);
+		}
+		if (ignore_blank && remove_endline(tmp).empty()) {
+			continue;
+		}
+		skip1--;
+		if (skip1 < 0) {
+			vline1.push_back(tmp);
+			line_maxlen = max(line_maxlen, (int)tmp.size());
+		}
+	}
+	while (getline(iss2, tmp, '\n')) {
+		tmp += '\n';
+		tmp = remove_space_in_line(tmp, this->trim_type);
+
+		if (this->CR_CRLF_not_equal == false) {
+			tmp = CF_CRLF_equal(tmp);
+		}
+		if (ignore_blank && remove_endline(tmp).empty()) {
+			continue;
+		}
+		skip2--;
+		if (skip2 < 0) {
+			vline2.push_back(tmp);
+			line_maxlen = max(line_maxlen, (int)tmp.size());
+		}
+	}
 }
 
 txt_compare::~txt_compare()
 {
 	output_info.clear();
-}
-
-static string CF_CRLF_equal(const string& str)
-{
-	string result = str, str_end;
-	if (str.size() >= 2) {
-		if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-			return str.substr(0, str.size() - 2)+'\n';
-		else
-			return str.substr(0, str.size());
-	}
-	else {
-		return str;
-	}
-}
-
-static string string_remove_special_char(const string& str)
-{
-	string result = str;
-	for(int i = 0; i < (int)str.size(); i++) {
-		if ((int)result[i] == 13 || (int)result[i] == 11 || (int)result[i] == 10 || (int)result[i] == 8 || (int)result[i] == 7)
-			result[i] = 'X';
-	}
-	return result;
 }
 
 static void output_(const string str1, const string str2, const int line1, const int line2, vector<Spair>& out, bool line1_state, bool line2_state, bool type)
@@ -182,79 +292,18 @@ static void output_(const string str1, const string str2, const int line1, const
 	}
 }
 
-void txt_compare::compare()
+int txt_compare::compare()
 {
-	ifstream file1, file2;
-	file1.open(filename1, ios::in | ios::binary);
-	if (file1.fail()) {
-		cerr << "无法打开文件：" << filename1 << endl;
-		return;
+	int skip1, skip2, width = 80;
+	if (line_offset >= 0) {
+		skip1 = line_skip;
+		skip2 = line_skip + line_offset;
 	}
-	file2.open(filename2, ios::in | ios::binary);
-	if (file2.fail()) {
-		cerr << "无法打开文件：" << filename2 << endl;
-		return;
+	else {
+		skip1 = line_skip - line_offset;
+		skip2 = line_skip;
 	}
-	vector<string>vline1, vline2;
 	string tmp;
-	int skip1, skip2, line_maxlen=0,width=80;
-	if(line_offset>=0){
-		skip1 = line_skip;
-		skip2 = line_skip + line_offset;
-	} else {
-		skip1 = line_skip - line_offset;
-		skip2 = line_skip;
-	}
-	while (getline(file1, tmp,'\n')) {
-		tmp += '\n';
-		//tmp = remove_endline(tmp);
-		//tmp = tmp.substr(0, tmp.size() - 1);
-		tmp = remove_space_in_line(tmp, this->trim_type);
-		if(this->CR_CRLF_not_equal==false){
-			tmp = CF_CRLF_equal(tmp);
-			//tmp=remove_endline(tmp);
-		}
-		/*else {
-			tmp=string_remove_special_char(tmp);
-		}*/
-		if (ignore_blank && remove_endline(tmp).empty()) {
-			continue;
-		}
-		skip1--;
-		if (skip1 < 0) {
-			vline1.push_back(tmp);
-			line_maxlen = max(line_maxlen, (int)tmp.size());
-		}
-	}
-	while (getline(file2, tmp, '\n')) {
-		tmp += '\n';
-		//tmp = remove_endline(tmp);
-		//tmp = tmp.substr(0, tmp.size() - 1);
-		tmp = remove_space_in_line(tmp, this->trim_type);
-		
-		if (this->CR_CRLF_not_equal == false) {
-			tmp = CF_CRLF_equal(tmp);
-			//tmp=remove_endline(tmp);
-		}
-		/*else {
-			tmp=string_remove_special_char(tmp);
-		}*/
-		if (ignore_blank && remove_endline(tmp).empty()) {
-			continue;
-		}
-		skip2--;
-		if (skip2 < 0) {
-			vline2.push_back(tmp);
-			line_maxlen = max(line_maxlen, (int)tmp.size());
-		}
-	}
-	if(line_offset>=0){
-		skip1 = line_skip;
-		skip2 = line_skip + line_offset;
-	} else {
-		skip1 = line_skip - line_offset;
-		skip2 = line_skip;
-	}
 	width = (line_maxlen / 10 + 1) * 10 + 8 + 2;
 	if (this->display_type=="detailed" && width < 80)
 		width = 80;
@@ -282,7 +331,6 @@ void txt_compare::compare()
 				output_info.push_back(Spair{ 0,"文件不同.\n" });
 				diff_cnt++;
 				flag = 0;
-				return;
 			}
 			else if (this->display_type == "normal") {
 				if (flag == 1) {
@@ -359,8 +407,7 @@ void txt_compare::compare()
         7、中文因为编码问题，差异位置可能报在后半个汉字上，但整个汉字都亮色标出\n"+ cut_line });
 		}
 	}
-	file1.close();
-	file2.close();
+	return diff_cnt;
 }
 
 void txt_compare::result()

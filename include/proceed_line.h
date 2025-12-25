@@ -1,3 +1,4 @@
+/* 2452839 Ðì´¨ ¼Æ¿Æ */
 #pragma once
 #include <string>
 #include<sstream>
