@@ -65,7 +65,7 @@ public:
 	/* 取配置文件中的所有组，返回在 vector 中 */
 	int get_all_group(vector <string>& ret);
 
-	/* 取配置文件中的某个组的所有项的原始内容，返回在 vector 中，默认是组名大小写不敏感 */
+	/* 取配置文件中的某个组的所有项(整行内容)的原始内容，返回在 vector 中，默认是组名大小写不敏感 */
 	int get_all_item(const char* const group_name, vector <string>& ret, const bool is_case_sensitive = false);
 	int get_all_item(const string& group_name, vector <string>& ret, const bool is_case_sensitive = false);
 

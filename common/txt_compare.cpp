@@ -104,7 +104,7 @@ txt_compare::txt_compare(string filename1, string filename2, string trim_type, s
 	file2.close();
 }
 
-txt_compare::txt_compare(istringstream iss1, istringstream iss2, string trim_type, string display_type, int line_skip, int line_offset, int line_max_diffnum, int line_max_linenum, bool ignore_blank, bool CR_CRLF_not_equal, bool debug)
+txt_compare::txt_compare(istringstream& iss1, istringstream& iss2, string trim_type, string display_type, int line_skip, int line_offset, int line_max_diffnum, int line_max_linenum, bool ignore_blank, bool CR_CRLF_not_equal, bool debug)
 {
 	this->filename1 = "iss1";
 	this->filename2 = "iss2";

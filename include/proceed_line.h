@@ -11,3 +11,5 @@ string remove_comment_in_line(const string& line, const string& comment_delimite
 bool cmp_str(const string& s1, const string& s2, const bool is_case_sensitive);
 string string_to_hex(const string& str);
 string remove_endline(const string& str);
+string split_string_with_c(string& ori,char tar);
+string ip_u_to_str(unsigned int ipaddr);

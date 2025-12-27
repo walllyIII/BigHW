@@ -118,3 +118,26 @@ string string_to_hex(const string& str)
 	}
 	return oss.str();
 }
+
+string split_string_with_c(string& ori, char tar)
+{
+	size_t pos = ori.find_first_of(tar);
+	if (pos == string::npos)
+		return "";
+	string ret = ori.substr(0, pos);
+	ori = ori.substr(pos + 1, ori.size() - pos - 1);
+	return ret;
+}
+
+string ip_u_to_str(unsigned int ipaddr)
+{
+	string a = "", b = "", c = "", d = "";
+	a = to_string(ipaddr & 0xff);
+	ipaddr >>= 8;
+	b = to_string(ipaddr & 0xff);
+	ipaddr >>= 8;
+	c = to_string(ipaddr & 0xff);
+	ipaddr >>= 8;
+	d = to_string(ipaddr & 0xff);
+	return d + "." + c + "." + b + "." + a;
+}

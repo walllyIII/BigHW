@@ -139,6 +139,9 @@
     <ClInclude Include="..\include\txt_compare.h" />
     <ClInclude Include="hw_check_exe.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\lib_mariadb_x86\libmariadb.lib" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
