@@ -7,6 +7,7 @@
 #include<climits>
 #include<iomanip>
 #include <sys/stat.h>
+#include<algorithm>
 #include"../include/class_aat.h"
 #include"../include/class_cft.h"
 #include"../include/txt_compare.h"

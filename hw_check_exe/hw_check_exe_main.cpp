@@ -47,6 +47,13 @@ static void usage(const char* const full_procname,ostringstream& msg)
 	msg << endl;
 }
 
+static bool is_file_exist_win(const std::string& file_path) {
+	// 多字节版本（A后缀），若用宽字符则用 GetFileAttributesW + std::wstring
+	DWORD attr = GetFileAttributesA(file_path.c_str());
+	// 1. 属性无效 → 不存在；2. 不是文件夹 → 是普通文件
+	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
+}
+
 static void remove_bracket_in_line(string& line)
 {
 	line = remove_space_in_line(line, "all");
@@ -266,57 +273,19 @@ static void trans_cfg_info(config_file_tools list, const string checkname, ST_HW
 	}
 }
 
-static void proceed_cfg_info(config_file_tools list, ST_HW_CHECK_EXE_CFG& info,const string checkname, const string debug_level,const bool is_checkcfg_only)
+static string find_s_incfg(ST_HW_CHECK_EXE_CFG info, string tar)
 {
-	if (is_checkcfg_only) {
-
-	}
-	if (debug_level != "") {
-
-	}
-	vector<string> include;
-	string head = checkname;
-	while (list.item_get_null(head,"include")) {
-		string tmp;
-		list.item_get_raw(head, "include",tmp);
-		if (tmp == "")break;
-		head = tmp;
-		include.push_back(head);
-	}
-	for (size_t i = 0; i < include.size(); i++) {
-		string cur = include[i];
-		cur = remove_space_in_line(cur, "all");
-		trans_cfg_info(list, cur,info);
-	}
-	trans_cfg_info(list, checkname, info);
-}
-
-static bool check_name_list(const vector<string> name_list)
-{
-	for (size_t i = 0; i < name_list.size(); i++) {
-		string tmp = name_list[i],cno,stu_no;
-		tmp += '-';
-		cno = split_string_with_c(tmp, '-');
-		stu_no=split_string_with_c(tmp, '-');
-		if ((cno.size() != 8 && cno.size() != 13) || stu_no.size() != 7)
-			return 0;
-	}
-	return 1;
-}
-
-static string find_s_incfg(ST_HW_CHECK_EXE_CFG info,string tar)
-{
-	if (tar == "exe_style")return info.exe_style==""?"<EMPTY>": info.exe_style;
+	if (tar == "exe_style")return info.exe_style == "" ? "<EMPTY>" : info.exe_style;
 	if (tar == "name_list")return info.name_list == "" ? "<EMPTY>" : info.name_list;
-	if (tar == "single_exe_dirname")return (info.single_exe_dirname == "" ? "<EMPTY>" : info.single_exe_dirname )+'\\';
-	if (tar == "multi_exe_main_dirname")return (info.multi_exe_main_dirname == "" ? "<EMPTY>" : info.multi_exe_main_dirname)+ '\\';
-	if (tar == "multi_exe_sub_dirname")return (info.multi_exe_sub_dirname == "" ? "<EMPTY>" : info.multi_exe_sub_dirname )+ '\\';
+	if (tar == "single_exe_dirname")return (info.single_exe_dirname == "" ? "<EMPTY>" : info.single_exe_dirname) + '\\';
+	if (tar == "multi_exe_main_dirname")return (info.multi_exe_main_dirname == "" ? "<EMPTY>" : info.multi_exe_main_dirname) + '\\';
+	if (tar == "multi_exe_sub_dirname")return (info.multi_exe_sub_dirname == "" ? "<EMPTY>" : info.multi_exe_sub_dirname) + '\\';
 	if (tar == "stu_exe_name")return (info.stu_exe_name == "" ? "<EMPTY>" : info.stu_exe_name);
 	if (tar == "demo_exe_name")return (info.demo_exe_name == "" ? "<EMPTY>" : info.demo_exe_name);
 	if (tar == "cmd_style")return (info.cmd_style == "" ? "<EMPTY>" : info.cmd_style);
 	if (tar == "pipe_get_input_data_exe_name")return (info.pipe_get_input_data_exe_name == "" ? "<EMPTY>" : info.pipe_get_input_data_exe_name);
 	if (tar == "pipe_data_file")return (info.pipe_data_file == "" ? "<EMPTY>" : info.pipe_data_file);
-	if (tar == "redirection_data_dirname")return (info.redirection_data_dirname == "" ? "<EMPTY>" : info.redirection_data_dirname )+ '\\';
+	if (tar == "redirection_data_dirname")return (info.redirection_data_dirname == "" ? "<EMPTY>" : info.redirection_data_dirname) + '\\';
 	if (tar == "timeout")return to_string(info.timeout);
 	if (tar == "max_output_len")return to_string(info.max_output_len);
 	if (tar == "tc_trim")return info.tc_trim;
@@ -333,7 +302,7 @@ static string find_s_incfg(ST_HW_CHECK_EXE_CFG info,string tar)
 	return "";
 }
 
-static void checkcfg_only(const string check_name, config_file_tools cfg, ST_HW_CHECK_EXE_CFG cfg_info, const vector<string> name_list)
+static void checkcfg_only(const string check_name, config_file_tools cfg, ST_HW_CHECK_EXE_CFG cfg_info, /*const vector<string> name_list,*/ostringstream& omsg)
 {
 	ostringstream oss;
 	vector<string> list;
@@ -351,24 +320,11 @@ static void checkcfg_only(const string check_name, config_file_tools cfg, ST_HW_
 			max_len = max_len < (int)list[i].size() ? list[i].size() : max_len;
 		}
 		cout << "[数据库]：" << endl;
-		//vector<string> da;
-		//cfg.get_all_item("[数据库]",da);
-		//for (size_t i = 0; i < da.size(); i++) {
-		//	cout << da[i] << endl;
-		//}
 		for (int i = 0; i < 6; i++) {
 			string tmp;
 			if (i == 0) {
 				unsigned int ip;
 				cfg.item_get_ipaddr("[数据库]", list[i], ip);
-				/*				cout << ip % 256 << endl;
-								ip /= 256;
-								cout << ip % 256 << endl;
-								ip /= 256;
-								cout << ip % 256 << endl;
-								ip /= 256;
-								cout << ip % 256 << endl;
-								ip /= 256;*/
 				tmp = ip_u_to_str(ip);
 			}
 			else if (i == 1) {
@@ -474,54 +430,22 @@ static void checkcfg_only(const string check_name, config_file_tools cfg, ST_HW_
 		oss << "item_args不存在" << endl;
 		is_correct = 0;
 	}
-	file.open(cfg_info.demo_exe_name);
-	if (file.fail()) {
+	if (!is_file_exist_win(cfg_info.demo_exe_name)) {
 		oss << "demo_exe_name文件" << cfg_info.demo_exe_name << "不存在" << endl;
 		is_correct = 0;
 	}
 	if (cfg_info.name_list != "database") {
-		file.open(cfg_info.name_list);
-		if (file.fail()) {
+		if (!is_file_exist_win(cfg_info.name_list)) {
 			oss << "name_list文件" << cfg_info.name_list << "不存在" << endl;
 			is_correct = 0;
 		}
 	}
-	for (size_t i = 0; i < name_list.size(); i++) {
-		if (cfg_info.exe_style == "single") {
-			string tmp, stu_info;
-			tmp = name_list[i];
-			stu_info = split_string_with_c(tmp, '-');
-			stu_info += '-' + split_string_with_c(tmp, '-');
-			tmp = cfg_info.single_exe_dirname + '\\' + stu_info + '-' + cfg_info.stu_exe_name;
-			file.open(tmp);
-			if (file.fail()) {
-				oss << "文件" << tmp << "不存在" << endl;
-				is_correct = 0;
-			}
-		}
-		else if (cfg_info.exe_style == "multi") {
-			string tmp, stu_info;
-			tmp = name_list[i];
-			stu_info = split_string_with_c(tmp, '-');
-			stu_info += '-' + split_string_with_c(tmp, '-');
-			tmp = cfg_info.multi_exe_main_dirname + '\\' + stu_info + '\\' + cfg_info.multi_exe_sub_dirname + '\\' + cfg_info.stu_exe_name;
-			file.open(tmp);
-			if (file.fail()) {
-				oss << "文件" << tmp << "不存在" << endl;
-				is_correct = 0;
-			}
-		}
-		else
-			break;
-	}
 	if (cfg_info.cmd_style == "pipe") {
-		file.open(cfg_info.pipe_get_input_data_exe_name);
-		if (file.fail()) {
+		if (!is_file_exist_win(cfg_info.pipe_get_input_data_exe_name)) {
 			oss << "pipe_get_input_data_exe_name文件" << cfg_info.pipe_get_input_data_exe_name << "不存在" << endl;
 			is_correct = 0;
 		}
-		file.open(cfg_info.pipe_data_file);
-		if (file.fail()) {
+		if (!is_file_exist_win(cfg_info.pipe_data_file)) {
 			oss << "pipe_data_file文件" << cfg_info.pipe_data_file << "不存在" << endl;
 			is_correct = 0;
 		}
@@ -530,47 +454,73 @@ static void checkcfg_only(const string check_name, config_file_tools cfg, ST_HW_
 		for (size_t i = 0; i < cfg_info.item_fnames.size(); i++) {
 			string tmp = cfg_info.redirection_data_dirname;
 			tmp += '\\' + cfg_info.item_fnames[i];
-			file.open(tmp);
-			if (file.fail()) {
+			if (!is_file_exist_win(tmp)) {
 				oss << "文件" << tmp << "不存在" << endl;
 				is_correct = 0;
 			}
 		}
 	}
 	if (!is_correct) {
-		cout << endl << "[--严重错误--] 配置文件存在下列的错误：" << endl;
-		cout << oss.str() << endl;
+		omsg << oss.str() << endl;
 	}
 	file.close();
 }
 
-//static bool isDirectoryExists(const std::string& folderPath) {
-//	struct stat info;
-//	if (stat(folderPath.c_str(), &info) != 0) {
-//		return false;
-//	}
-//	return (info.st_mode & S_IFDIR) != 0;
-//}
-//
-//static void proceed_name_list(ST_HW_CHECK_EXE_CFG info,vector<string>& list)
-//{
-//	if (info.exe_style == "none")return;
-//	vector<string>done_list;
-//	for (size_t i = 0; i < list.size(); i++) {
-//		if (info.exe_style == "single")continue;
-//		string tmp, stu_cno, stu_no, stu_name, dir, exe;
-//		tmp = list[i] + '-';
-//		stu_cno = split_string_with_c(tmp, '-');
-//		stu_no = split_string_with_c(tmp, '-');
-//		stu_name = split_string_with_c(tmp, '-');
-//		dir = info.multi_exe_main_dirname + '\\' + stu_no + '-' + stu_cno + '\\' /*+ info.multi_exe_sub_dirname*/;
-//		exe = info.stu_exe_name;
-//		if (is_directory_empty_win(dir)) {
-//			done_list.push_back(list[i]);
-//		}
-//	}
-//	list = done_list;
-//}
+static void proceed_cfg_info(config_file_tools list, ST_HW_CHECK_EXE_CFG& info,const string checkname, const string debug_level,const bool is_checkcfg_only, ostringstream& omsg)
+{
+	if (debug_level != "") {
+		cout << "debug mode " << debug_level << endl;
+	}
+	vector<string> include;
+	string head = checkname;
+	while (list.item_get_null(head,"include")) {
+		string tmp;
+		list.item_get_raw(head, "include",tmp);
+		if (tmp == "")break;
+		head = tmp;
+		include.push_back(head);
+	}
+	for (vector<string>::reverse_iterator i = include.rbegin(); i !=include.rend(); i++) {
+		string cur = *i;
+		cur = remove_space_in_line(cur, "all");
+		trans_cfg_info(list, cur,info);
+		if (is_checkcfg_only) {
+			checkcfg_only(cur.substr(1, cur.size()-2),list,info,omsg);
+		}
+	}
+	trans_cfg_info(list, checkname, info);
+	if (is_checkcfg_only) {
+		checkcfg_only(checkname.substr(1, checkname.size() - 2), list, info, omsg);
+	}
+}
+
+static bool check_name_list(const vector<string> name_list)
+{
+	for (size_t i = 0; i < name_list.size(); i++) {
+		string tmp = name_list[i],cno,stu_no;
+		tmp += '-';
+		cno = split_string_with_c(tmp, '-');
+		stu_no=split_string_with_c(tmp, '-');
+		if ((cno.size() != 8 && cno.size() != 13) || stu_no.size() != 7)
+			return 0;
+	}
+	return 1;
+}
+
+static bool cmp(const string& a, const string& b) 
+{
+	string at = a, bt = b;
+	at += '-';
+	bt += '-';
+	split_string_with_c(at, '-');
+	split_string_with_c(bt, '-');
+	return split_string_with_c(at, '-') < split_string_with_c(bt, '-');
+}
+
+static void order_name_list(vector<string>& list)
+{
+	sort(list.begin(), list.end(), cmp);
+}
 
 /***************************************************************************
   函数名称：
@@ -599,7 +549,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	ostringstream msg;
+	ostringstream msg,checkcfg_only_msg;
 	int cur_argc;
 
 	if ((cur_argc = args_analyse_process(argc, argv, args, 0)) < 0) {
@@ -655,7 +605,17 @@ int main(int argc, char** argv)
 	db_cno_list=remove_space_in_line(db_cno_list, "all");
 	
 	ST_HW_CHECK_EXE_CFG cfg_info;
-	proceed_cfg_info(cfg, cfg_info, '['+check_name+']', debug_level, is_checkcfg_only);
+	checkcfg_only_msg.str(""); checkcfg_only_msg.clear();
+	proceed_cfg_info(cfg, cfg_info, '['+check_name+']', is_debug?debug_level:"", is_checkcfg_only, checkcfg_only_msg);
+
+	if (is_checkcfg_only) {
+		if (checkcfg_only_msg.str().size()) {
+			cout << endl << "[--严重错误--] 配置文件存在下列的错误：" << endl;
+			cout << checkcfg_only_msg.str() << endl;
+		}
+		//checkcfg_only(check_name, cfg, cfg_info, );
+		return 0;
+	}
 
 #if main_debug
 	string s1 = "1,2,3,",s2="1 2 3 ",s3="1\t2\t3\t",t;
@@ -674,6 +634,7 @@ int main(int argc, char** argv)
 #endif
 
 	vector<string>name_list;
+
 	if (!is_checkcfg_only) {
 		MYSQL* mysql;
 		MYSQL_RES* result;
@@ -702,7 +663,7 @@ int main(int argc, char** argv)
 				string cno_head = split_string_with_c(db_cno_list_tmp,',');
 				if (cno_head == "")
 					break;
-				string search_info = "select stu_cno, stu_no, stu_name from view_student_for_oop  where stu_cno = \"" + cno_head + "\" and stu_cno_is_del = '0' ";
+				string search_info = "select stu_cno, stu_no, stu_name from view_student_for_oop  where stu_cno = \"" + cno_head + "\" and stu_cno_is_del = '0' and stu_enable = '1'  order by stu_no";
 				if (mysql_query(mysql, search_info.c_str())) {
 					cerr << "mysql_query failed(" << mysql_error(mysql) << ")" << endl;
 					return -1;
@@ -756,9 +717,9 @@ int main(int argc, char** argv)
 				for (size_t i = 0; i < line.size(); i++)
 					if (line[i] == '\t')line[i] = ' ';
 				line += ' ';
-				stu_info[0] = split_string_with_c(line,' ');
-				stu_info[1] = split_string_with_c(line,' ');
-				stu_info[2] = split_string_with_c(line,' ');
+				stu_info[0] = split_string_with_c(line,' ');	//cno
+				stu_info[1] = split_string_with_c(line,' ');	//no
+				stu_info[2] = split_string_with_c(line,' ');	//name
 				if (stu_info[0] == "" || stu_info[1] == "" || stu_info[2] == "") {
 					cerr << "文件：" << cfg_info.name_list << "名单列表有误" << endl;
 					return -1;
@@ -774,14 +735,62 @@ int main(int argc, char** argv)
 			cerr << "学生名单有误！" << endl;
 			return -1;
 		}
+		order_name_list(name_list);
 	}
 	
+#if main_debug
+	if (1) {
+		MYSQL* mysql;
+		MYSQL_RES* result;
+		MYSQL_ROW  row;
+		if ((mysql = mysql_init(NULL)) == NULL) {
+			cerr << "mysql_init failed" << endl;
+			return -1;
+		}
+
+		/* 连接数据库，失败返回NULL
+			1、mysqld没运行
+			2、没有指定名称的数据库存在 */
+		if (mysql_real_connect(mysql, db_host.c_str()/*+':'+db_port).c_str()*/, db_username.c_str(), db_passwd.c_str(), db_name.c_str(), 0, NULL, 0) == NULL) {
+			cerr << "mysql_real_connect failed(" << mysql_error(mysql) << ")" << endl;
+			return -1;
+		}
+
+		/* 设置字符集，否则读出的字符乱码 */
+		mysql_set_character_set(mysql, "gbk");
+
+		string search_info = "select * from view_student_for_oop  where stu_name = \"曹森\" ";
+		if (mysql_query(mysql, search_info.c_str())) {
+			cout << "mysql_query failed(" << mysql_error(mysql) << ")" << endl;
+			return -1;
+		}
+
+		/* 将查询结果存储起来，出现错误则返回NULL
+			注意：查询结果为NULL，不会返回NULL */
+		if ((result = mysql_store_result(mysql)) == NULL) {
+			cout << "mysql_store_result failed" << endl;
+			return -1;
+		}
+
+		/* 打印当前查询到的记录的数量 */
+		cout << "select return " << (int)mysql_num_rows(result) << " records" << endl;
+		while ((row = mysql_fetch_row(result)) != NULL) {
+			cout << setiosflags(ios::left);           //输出左对齐
+			/* 共13项，目前只打印了5项 */
+			for (int i = 0; i <= 13; i++)cout << row[i] << endl;
+			cout << endl;
+		}
+		cout << endl;
+
+		/* 释放result，否则会丢失内存 */
+		mysql_free_result(result);
+		getchar();
+	}
+	
+#endif
+
 	//proceed_name_list(cfg_info,name_list);
 
-	if (is_checkcfg_only) {
-		checkcfg_only(check_name,cfg,cfg_info,name_list);
-		return 0;
-	}
 	ofstream ofile;
 	string ofname;
 	ostringstream ofi;
@@ -946,13 +955,13 @@ int main(int argc, char** argv)
 					time_e = ctime(&now);
 					time_e = time_e.substr(0, time_e.size() - 1);
 					msg << "时间：" << time_b << "-" << time_e << endl;
-					msg << "======================================================================" << endl;
+					msg << "======================================================================" << endl << endl;
 					cout << msg.str();
 					msg.str(""); msg.clear();
 					ofi << i + 1 << '\t' << "=text(\"" + stu_cno + "\", \"#\")" << '\t' << stu_no << '\t' << stu_name << '\t' << '/' << '\t'
 						<< '/' << '\t' << '/' << '\t' << '/' << '\t'
 						<< '/' << '\t' << '/' << '\t' << '/' << '\t' << 0 << '\t';
-					for (size_t k = cfg_info.items_begin; k <= cfg_info.items_end; k++)
+					for (int k = cfg_info.items_begin; k <= cfg_info.items_end; k++)
 						ofi << 0 << '\t';
 					ofi << endl;
 					continue;
@@ -1059,7 +1068,7 @@ int main(int argc, char** argv)
 			time_e = ctime(&now);
 			time_e = time_e.substr(0, time_e.size() - 1);
 			msg << "时间：" << time_b << "-" << time_e << endl;
-			msg << "======================================================================" << endl;
+			msg << "======================================================================" << endl << endl;
 			cout << msg.str();
 			msg.str(""); msg.clear();
 			ofi << i + 1 << '\t' << "=text(\"" + stu_cno +"\", \"#\")" << '\t' << stu_no << '\t' << stu_name << '\t' << ok << '\t'
@@ -1074,7 +1083,7 @@ int main(int argc, char** argv)
 		strftime(time_buf, sizeof(time_buf), "%Y-%m-%d-%H-%M-%S", &tm_now);
 		now_time=time_buf;
 		ofname = "check-result-2452839-" + now_time + '-' + cfg_info.exe_style + '-'
-			+ cfg_info.cmd_style + (cfg_info.name_list == "database" ? "database" : "txt") + '-' + cfg_info.stu_exe_name + ".xls";
+			+ cfg_info.cmd_style + '-' + (cfg_info.name_list == "database" ? "database" : "txt") + '-' + cfg_info.stu_exe_name + ".xls";
 		ofile.open(ofname,ios::out);
 		ofile << ofi.str();
 		if (ofile.fail()) {
